@@ -20,3 +20,4 @@ public class Tugas_Praktikum_5 {
         m1.tampilkanInpo("Puput", 19, "2407113876");
     }
 }
+
