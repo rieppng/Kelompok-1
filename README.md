@@ -1,4 +1,4 @@
-V !.0
+V 1.0
 
 ~ Sebelum run Main aplikasi klinik, lakukan :
 1. Download Laragon lalu install. Download "adminer-costum.zip" dan "haha.sql" (repo ini)
