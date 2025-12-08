@@ -1,165 +1,359 @@
--- AdminNeo 4.17.2 MySQL 8.4.3 dump
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Dec 08, 2025 at 02:27 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
-SET NAMES utf8;
-SET time_zone = '+00:00';
-SET foreign_key_checks = 0;
-SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
-SET NAMES utf8mb4;
 
-CREATE DATABASE `klinik_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `klinik_db`;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
-DROP TABLE IF EXISTS `appointments`;
+--
+-- Database: `klinik_db`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `appointments`
+--
+
 CREATE TABLE `appointments` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `patient_id` int DEFAULT NULL,
-  `doctor_id` int DEFAULT NULL,
-  `date` date DEFAULT NULL,
-  `queue_number` int DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `queue_number` int(11) NOT NULL,
   `weight` double DEFAULT NULL,
   `height` double DEFAULT NULL,
-  `blood_pressure` varchar(20) DEFAULT NULL,
-  `status` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `patient_id` (`patient_id`),
-  KEY `doctor_id` (`doctor_id`),
-  CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`),
-  CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `blood_pressure` varchar(10) DEFAULT NULL,
+  `status` enum('WAITING','IN_CONSULTATION','IN_PHARMACY','IN_CASHIER','COMPLETED','CANCELLED') NOT NULL,
+  `consultation_service_fee_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `appointments` (`id`, `patient_id`, `doctor_id`, `date`, `queue_number`, `weight`, `height`, `blood_pressure`, `status`) VALUES
-(1,	1,	2,	'2025-11-21',	1,	123,	123,	NULL,	'COMPLETED'),
-(2,	2,	2,	'2025-11-23',	1,	50,	170,	NULL,	'COMPLETED'),
-(3,	3,	2,	'2025-11-23',	2,	70,	169,	NULL,	'COMPLETED'),
-(4,	4,	2,	'2025-11-23',	3,	12,	12,	NULL,	'COMPLETED'),
-(5,	5,	2,	'2025-11-23',	4,	12,	12,	NULL,	'COMPLETED'),
-(6,	6,	2,	'2025-11-24',	1,	12,	12,	NULL,	'COMPLETED'),
-(7,	7,	2,	'2025-11-24',	2,	58,	170,	NULL,	'COMPLETED'),
-(8,	8,	2,	'2025-11-24',	3,	12,	41,	NULL,	'COMPLETED'),
-(9,	9,	2,	'2025-11-24',	4,	50,	159,	NULL,	'COMPLETED'),
-(10,	10,	2,	'2025-11-24',	5,	154,	400,	NULL,	'WAITING');
+-- --------------------------------------------------------
 
-DROP TABLE IF EXISTS `bills`;
+--
+-- Table structure for table `appointment_services`
+--
+
+CREATE TABLE `appointment_services` (
+  `id` int(11) NOT NULL,
+  `appointment_id` int(11) NOT NULL,
+  `service_fee_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT 1,
+  `price_at_time` decimal(19,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bills`
+--
+
 CREATE TABLE `bills` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `appointment_id` int DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `appointment_id` int(11) NOT NULL,
   `total_medication_cost` double DEFAULT NULL,
-  `consultation_fee` double DEFAULT NULL,
-  `total_amount` double DEFAULT NULL,
-  `is_paid` tinyint(1) DEFAULT '0',
+  `consultation_fee` double NOT NULL,
+  `total_amount` double NOT NULL,
+  `is_paid` tinyint(1) DEFAULT 0,
   `payment_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `appointment_id` (`appointment_id`),
-  CONSTRAINT `bills_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `total_service_cost` decimal(19,2) DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `bills` (`id`, `appointment_id`, `total_medication_cost`, `consultation_fee`, `total_amount`, `is_paid`, `payment_date`) VALUES
-(1,	1,	0,	50000,	50000,	1,	'2025-11-24 20:32:46'),
-(2,	2,	0,	50000,	50000,	0,	NULL),
-(3,	3,	0,	50000,	50000,	0,	NULL),
-(4,	4,	0,	50000,	50000,	0,	NULL),
-(5,	5,	0,	50000,	50000,	0,	NULL),
-(6,	6,	0,	50000,	50000,	0,	NULL),
-(7,	7,	0,	50000,	50000,	0,	NULL),
-(8,	8,	0,	50000,	50000,	0,	NULL),
-(9,	9,	0,	50000,	50000,	0,	NULL);
+-- --------------------------------------------------------
 
-DROP TABLE IF EXISTS `medical_records`;
+--
+-- Table structure for table `medical_records`
+--
+
 CREATE TABLE `medical_records` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `appointment_id` int DEFAULT NULL,
-  `symptoms` text,
-  `diagnosis` text,
-  `treatment` text,
-  `consultation_fee` double DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `appointment_id` (`appointment_id`),
-  CONSTRAINT `medical_records_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `id` int(11) NOT NULL,
+  `appointment_id` int(11) NOT NULL,
+  `symptoms` text DEFAULT NULL,
+  `diagnosis` text DEFAULT NULL,
+  `treatment` text DEFAULT NULL,
+  `consultation_fee` double NOT NULL,
+  `record_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `medical_records` (`id`, `appointment_id`, `symptoms`, `diagnosis`, `treatment`, `consultation_fee`) VALUES
-(1,	1,	'sihat',	'no',	'sersan thundercock',	50000),
-(2,	2,	'abc',	'aas',	'asd',	50000),
-(3,	3,	'asd',	'asd',	'asd',	50000),
-(4,	4,	'asd',	'asd',	'asd',	50000),
-(5,	5,	'asd',	'asd',	'asd',	50000),
-(6,	6,	'asd',	'asd',	'asd',	50000),
-(7,	7,	'sehat',	'-',	'-',	50000),
-(8,	8,	'sakit gigi',	'gigi berlubang',	'-',	50000),
-(9,	9,	'asd',	'asd',	'asd',	50000);
+-- --------------------------------------------------------
 
-DROP TABLE IF EXISTS `medications`;
+--
+-- Table structure for table `medical_specialties`
+--
+
+CREATE TABLE `medical_specialties` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `medications`
+--
+
 CREATE TABLE `medications` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
   `category` varchar(50) DEFAULT NULL,
-  `stock_quantity` int DEFAULT NULL,
-  `price` double DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `price` double NOT NULL,
+  `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `medications` (`id`, `name`, `category`, `stock_quantity`, `price`) VALUES
-(1,	'sihat',	'Injeksi',	2,	150000),
-(2,	'Paradox',	'Tablet',	10,	15000);
+-- --------------------------------------------------------
 
-DROP TABLE IF EXISTS `patients`;
+--
+-- Table structure for table `patients`
+--
+
 CREATE TABLE `patients` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
   `nik` varchar(20) DEFAULT NULL,
-  `birth_date` date DEFAULT NULL,
-  `gender` char(1) DEFAULT NULL,
-  `address` text,
+  `birth_date` date NOT NULL,
+  `gender` enum('L','P') NOT NULL,
+  `address` text DEFAULT NULL,
   `phone_number` varchar(15) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `registered_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `patients` (`id`, `name`, `nik`, `birth_date`, `gender`, `address`, `phone_number`) VALUES
-(1,	'sasd',	'213213',	'2025-11-05',	'P',	'sadas',	'58674564'),
-(2,	'pidi',	'123456',	'2025-11-12',	'P',	'jl amilin',	'081234567890'),
-(3,	'ucup',	'12334',	'2025-11-04',	'P',	'sungai batak',	'085234567890'),
-(4,	'afas',	'123',	'2025-11-06',	'P',	'sad',	'123'),
-(5,	'azril',	'1234',	'2025-11-21',	'P',	'asdsad',	'123213'),
-(6,	'asd',	'123',	'2025-11-06',	'P',	'asd',	'123'),
-(7,	'nopal',	'123',	'2025-11-01',	'P',	'jalan parit indah',	'081234567890'),
-(8,	'andre',	'213',	'2025-11-05',	'P',	'asd',	'123'),
-(9,	'andriana',	'123',	'2025-11-20',	'P',	'asd',	'123'),
-(10,	'pidi',	'21321',	'2025-11-04',	'P',	'asd',	'123');
+-- --------------------------------------------------------
 
-DROP TABLE IF EXISTS `prescription_items`;
+--
+-- Table structure for table `prescription_items`
+--
+
 CREATE TABLE `prescription_items` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `medical_record_id` int DEFAULT NULL,
-  `medication_id` int DEFAULT NULL,
-  `quantity` int DEFAULT NULL,
-  `price_at_time` double DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `medical_record_id` int(11) NOT NULL,
+  `medication_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price_at_time` double NOT NULL,
   `instructions` varchar(255) DEFAULT NULL,
-  `status` varchar(20) DEFAULT 'PENDING',
-  PRIMARY KEY (`id`),
-  KEY `medical_record_id` (`medical_record_id`),
-  KEY `medication_id` (`medication_id`),
-  CONSTRAINT `prescription_items_ibfk_1` FOREIGN KEY (`medical_record_id`) REFERENCES `medical_records` (`id`),
-  CONSTRAINT `prescription_items_ibfk_2` FOREIGN KEY (`medication_id`) REFERENCES `medications` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `status` varchar(20) DEFAULT 'PENDING'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
 
-DROP TABLE IF EXISTS `users`;
+--
+-- Table structure for table `service_fees`
+--
+
+CREATE TABLE `service_fees` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `price` decimal(19,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
 CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `full_name` varchar(100) DEFAULT NULL,
-  `role` varchar(20) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `full_name` varchar(100) NOT NULL,
+  `role` enum('SUPERADMIN','RECEPTIONIST','DOCTOR','PHARMACIST','CASHIER') NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_active` tinyint(1) DEFAULT 0,
+  `medical_specialty_id` int(11) DEFAULT 0,
+  `consultation_fee` decimal(19,2) DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`) VALUES
-(1,	'admin',	'admin123',	'Super Admin',	'SUPERADMIN'),
-(2,	'arip',	'1234',	'aulia',	'DOCTOR'),
-(3,	'tio',	'tio123',	'tio prtm',	'RECEPTIONIST'),
-(4,	'wawa',	'123',	'wawa',	'PHARMACIST'),
-(5,	'varel',	'123',	'varel',	'CASHIER');
+--
+-- Indexes for dumped tables
+--
 
--- 2025-11-28 14:30:30 UTC
+--
+-- Indexes for table `appointments`
+--
+ALTER TABLE `appointments`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_queue_per_doctor_per_day` (`doctor_id`,`date`,`queue_number`),
+  ADD KEY `patient_id` (`patient_id`);
+
+--
+-- Indexes for table `appointment_services`
+--
+ALTER TABLE `appointment_services`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `appointment_id` (`appointment_id`),
+  ADD KEY `service_fee_id` (`service_fee_id`);
+
+--
+-- Indexes for table `bills`
+--
+ALTER TABLE `bills`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `appointment_id` (`appointment_id`);
+
+--
+-- Indexes for table `medical_records`
+--
+ALTER TABLE `medical_records`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `appointment_id` (`appointment_id`);
+
+--
+-- Indexes for table `medical_specialties`
+--
+ALTER TABLE `medical_specialties`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `medications`
+--
+ALTER TABLE `medications`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `patients`
+--
+ALTER TABLE `patients`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nik` (`nik`);
+
+--
+-- Indexes for table `prescription_items`
+--
+ALTER TABLE `prescription_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `medical_record_id` (`medical_record_id`),
+  ADD KEY `medication_id` (`medication_id`);
+
+--
+-- Indexes for table `service_fees`
+--
+ALTER TABLE `service_fees`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `appointments`
+--
+ALTER TABLE `appointments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `appointment_services`
+--
+ALTER TABLE `appointment_services`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `bills`
+--
+ALTER TABLE `bills`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `medical_records`
+--
+ALTER TABLE `medical_records`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `medical_specialties`
+--
+ALTER TABLE `medical_specialties`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `medications`
+--
+ALTER TABLE `medications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `patients`
+--
+ALTER TABLE `patients`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `prescription_items`
+--
+ALTER TABLE `prescription_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `service_fees`
+--
+ALTER TABLE `service_fees`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `appointments`
+--
+ALTER TABLE `appointments`
+  ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`),
+  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `appointment_services`
+--
+ALTER TABLE `appointment_services`
+  ADD CONSTRAINT `appointment_services_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`),
+  ADD CONSTRAINT `appointment_services_ibfk_2` FOREIGN KEY (`service_fee_id`) REFERENCES `service_fees` (`id`);
+
+--
+-- Constraints for table `bills`
+--
+ALTER TABLE `bills`
+  ADD CONSTRAINT `bills_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`);
+
+--
+-- Constraints for table `medical_records`
+--
+ALTER TABLE `medical_records`
+  ADD CONSTRAINT `medical_records_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`);
+
+--
+-- Constraints for table `prescription_items`
+--
+ALTER TABLE `prescription_items`
+  ADD CONSTRAINT `prescription_items_ibfk_1` FOREIGN KEY (`medical_record_id`) REFERENCES `medical_records` (`id`),
+  ADD CONSTRAINT `prescription_items_ibfk_2` FOREIGN KEY (`medication_id`) REFERENCES `medications` (`id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
